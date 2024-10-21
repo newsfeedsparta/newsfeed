@@ -1,4 +1,4 @@
 package com.sparta.newsfeed.exception;
 
-public class AuthAlreadyExistsException {
+public class UserAlreadyExistsException {
 }

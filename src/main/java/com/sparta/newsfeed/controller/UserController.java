@@ -1,4 +1,4 @@
 package com.sparta.newsfeed.controller;
 
-public class AuthController {
+public class UserController {
 }

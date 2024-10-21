@@ -1,4 +1,4 @@
 package com.sparta.newsfeed.repository;
 
-public class AuthRepository {
+public interface ProfileRepository {
 }

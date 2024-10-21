@@ -1,4 +1,4 @@
 package com.sparta.newsfeed.entity;
 
-public class Auth {
+public class User {
 }

@@ -1,4 +1,4 @@
 package com.sparta.newsfeed.service;
 
-public class AuthService {
+public class UserService {
 }
