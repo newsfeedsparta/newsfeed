@@ -71,13 +71,17 @@ public class UserService {
         return user.to();
     }
 
+    @Transactional
     public void withdraw(WithdrawRequestDto wreq, HttpServletRequest hreq) {
-        // hreq에 있는 유저가 존재하는지 확인
+        // hreq에 담긴 유저가 존재하는지 확인
+        User user = (User) hreq.getAttribute("user");
 
-        // hreq의 비밀번호와 wreq의 비밀번호가 일치하는지 확인
+        // 유저의 비밀번호와 wreq의 비밀번호가 일치하는지 확인
+        if (!passwordEncoder.matches(wreq.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
 
-        // 일치한다면 db에서 유저 정보 지우기
-
+        userRepository.delete(user);
     }
 
     public void getMyPosts(HttpServletRequest req) {
