@@ -31,13 +31,13 @@ public class User {
     @Column (name = "password")
     private String password;
 
-    @OneToOne(mappedBy = "profile", cascade = CascadeType.ALL) // 프로필이랑 1:1 관계
+    @OneToOne(mappedBy = "user", cascade = CascadeType.MERGE) // 프로필이랑 1:1 관계
     private Profile profile;
 
-    @OneToMany(mappedBy = "post") // 포스트랑 1:n 관계
+    @OneToMany(mappedBy = "user") // 포스트랑 1:n 관계
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "friend")  // 친구랑 1:n 관계
+    @OneToMany(mappedBy = "user")  // 친구랑 1:n 관계,  mappedBy는 받아오는 곳의 이름인 user로  수정
     private List<Friend> friend;
 
 }
