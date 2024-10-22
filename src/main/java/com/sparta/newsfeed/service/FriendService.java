@@ -11,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
 
 @Service
 public class FriendService {
@@ -40,18 +44,32 @@ public class FriendService {
         return response;
     }
 
-    // 2. 친구 게시물 조회
 
-    // 3. 친구 삭제
-    public void deleteFriend(Long userId, Long friendId) {
-        //현재 사용자의 친구 관계 삭제
-        friendRepository.deleteByUserIdAndFriendId(userId, friendId);
-        // 상대방의 친구 목록에서 삭제
-        friendRepository.deleteByUserIdAndFriendId(friendId, userId);
-        //  A가 B를 친구 목록에서 삭제할 경우, B의 친구 목록에서도  A가 삭제됨.
-        // 친구 삭제 후 다시 친구 요청을 할 수 있음. (데이터베이스에서 기록 삭제)
+        // 2. 친구의 게시물 조회
 
+
+
+        // 3. 친구 삭제
+        public void deleteFriend (Long userId, Long friendId){
+            //현재 사용자의 친구 관계 삭제
+            friendRepository.deleteByUserIdAndFriendId(userId, friendId);
+            // 상대방의 친구 목록에서 삭제
+            friendRepository.deleteByUserIdAndFriendId(friendId, userId);
+            //  A가 B를 친구 목록에서 삭제할 경우, B의 친구 목록에서도  A가 삭제됨.
+            // 친구 삭제 후 다시 친구 요청을 할 수 있음. (데이터베이스에서 기록 삭제)
+
+        }
+
+        // 친구 관계가 수락되었는지 확인하는 메소드
+        public boolean isFriendAccepted(Long userId, Long friendId) {
+        return friendRepository.findById(friendId)
+                .map(friend -> friend.getStatus() == FriendStatus.ACCEPTED)
+                .orElse(false);
     }
 
+
 }
+
+
+    
 

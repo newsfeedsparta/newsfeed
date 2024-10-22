@@ -1,8 +1,10 @@
 package com.sparta.newsfeed.controller;
 
+import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.dto.friend.FriendResponseDto;
 import com.sparta.newsfeed.service.FriendService;
 import com.sparta.newsfeed.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +26,21 @@ public class FriendController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FriendResponseDto> getFriends(@PathVariable Long id,
                                                         @RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "10") int size
-                                                        //  @AuthenticationPrincipal 추가
-                                                        ) {
+                                                        @RequestParam(defaultValue = "10") int size,
+                                                        HttpServletRequest request) {
 
-        // 로그인된 사용자와 요청한 사용자 ID가 일치하는지 확인
+        // request에서 인증된 사용자 정보 가져오기
+        User currentUser = (User) request.getAttribute("user");
+
+        // null 체크
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우
+        }
+
+        // 로그인한 사용자와 요청한 사용자 ID가 일치하는지 확인
+        if (!currentUser.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
         // 수락된 친구만 불러오기
         FriendResponseDto response = friendService.getFriends(id, page, size);
@@ -36,13 +48,61 @@ public class FriendController {
     }
 
 
-    // 2. 친구 게시물 조회 추가
 
-    // 3. 친구 삭제 (로그인 상태)
+
+    // 2. 친구의 게시물 조회 (로그인된 사용자가 친구의 게시물만 조회할 수 있도록)
+    @GetMapping("/{friendId}/posts")
+    public ResponseEntity<?> getFriendPosts(
+            @PathVariable Long userId,
+            @PathVariable Long friendId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+
+        // request에서 인증된 사용자 정보 가져오기
+        User currentUser = (User) request.getAttribute("user");
+
+        // null 체크
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우
+        }
+
+        // 로그인한 사용자와 요청한 사용자 ID가 일치하는지 확인
+        if (!currentUser.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // 친구 관계가 ACCEPTED 상태인지 확인
+        boolean isFriendAccepted = friendService.isFriendAccepted(userId, friendId);
+        if (!isFriendAccepted) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 친구 관계가 아닌 경우
+        }
+
+        // 친구의 게시물 조회
+        PostResponseDto postResponse = postService.getPostsByFriend(friendId, page, size);
+        return new ResponseEntity<>(postResponse, HttpStatus.OK);
+    }
+
+
+
+    // 3. 친구 삭제
     @DeleteMapping("/{friendId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> deleteFriend(
-    @PathVariable Long id, @PathVariable Long friendId) {
+            @PathVariable Long id,
+            @PathVariable Long friendId,
+            HttpServletRequest request) {
+
+        // 로그인된 사용자 정보 가져오기
+        User currentUser = (User) request.getAttribute("user");
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        if (!currentUser.getId().equals(id)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         friendService.deleteFriend(id, friendId);
         return ResponseEntity.ok("{\"message\":\"Friend deleted successfully\"}");
     }
