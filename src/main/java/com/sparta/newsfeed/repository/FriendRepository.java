@@ -18,4 +18,6 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     void deleteByFriendIdAndUserId(Long friendId, Long userId); // B가 A를 삭제할 때
 
     List<Friend> findByReceiverId(Long receiverId); // 수신자 ID로 친구 요청 목록 조회
+
+    List<Long> findAcceptedFriendIdsByUserId(Long userId);
 }

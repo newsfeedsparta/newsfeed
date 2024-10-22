@@ -5,9 +5,13 @@ import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.entity.Post;
 import com.sparta.newsfeed.entity.User;
 import com.sparta.newsfeed.exception.PostNotFoundException;
+import com.sparta.newsfeed.repository.FriendRepository;
 import com.sparta.newsfeed.repository.PostRepository;
 import com.sparta.newsfeed.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,5 +80,30 @@ public class PostService {
     }
 
     public PostResponseDto getPostsByFriend(Long friendId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 친구 목록 가져오기 (수락된 친구만)
+
+        // 친구 목록 가져오기 (수락된 친구만)
+        List<Long> friendIds = friendRepository.findAcceptedFriendIdsByUserId(userId);
+
+
+        // 친구들의 게시물 페이징 처리
+        Page<Post> postsPage = postRepository.findByUserIdIn(friendIds, pageable);
+
+        // 게시물 리스트 변환
+        List<PostResponseDto> postDtos = postsPage.getContent().stream()
+                .map(PostResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+        // PostResponseDto로 페이징 정보와 게시물 리스트를 함께 반환
+        return PostResponseDto.createPagedResponse(
+                page,
+                postsPage.getTotalPages(),
+                postsPage.getTotalElements(),
+                postDtos
+        );
+
+
     }
 }
