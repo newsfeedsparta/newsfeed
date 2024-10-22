@@ -19,10 +19,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class FriendService {
-
     private FriendRepository friendRepository;
-
     private UserRepository userRepository;
+    private PostRepository postRepository;
 
     // 친구 요청 생성 및 상태 설정
     public FriendResponseDto createFriendRequest(Long requestorId, FriendRequestDto friendRequestDto) {
@@ -73,8 +72,6 @@ public class FriendService {
         return friendResponseDto;
     }
 
-    private PostRepository postRepository;
-
     public FriendResponseDto getFriends(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -115,6 +112,4 @@ public class FriendService {
                 .map(friend -> friend.getStatus() == FriendStatus.ACCEPTED)
                 .orElse(false);
     }
-
-
 }

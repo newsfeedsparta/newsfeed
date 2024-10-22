@@ -3,6 +3,7 @@ package com.sparta.newsfeed.controller;
 import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.dto.friend.FriendRequestDto;
 import com.sparta.newsfeed.dto.friend.FriendResponseDto;
+import com.sparta.newsfeed.entity.User;
 import com.sparta.newsfeed.service.FriendService;
 import com.sparta.newsfeed.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
+@RequestMapping("/api/users")
 public class FriendController {
-
     private FriendService friendService; // 친구 서비스 주입
 
     // 친구 요청 생성 API
@@ -39,7 +41,7 @@ public class FriendController {
         List<FriendResponseDto> requests = friendService.getFriendRequests(id);
         return ResponseEntity.ok(requests); // 요청 목록 반환
     }
-
+    
     // @Autowired 추가
     private PostService postService;
 
