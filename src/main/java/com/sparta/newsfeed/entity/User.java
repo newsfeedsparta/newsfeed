@@ -31,7 +31,7 @@ public class User {
     @Column (name = "password")
     private String password;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.MERGE) // 프로필이랑 1:1 관계
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // 프로필이랑 1:1 관계
     private Profile profile;
 
     @OneToMany(mappedBy = "user") // 포스트랑 1:n 관계

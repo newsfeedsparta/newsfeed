@@ -20,7 +20,7 @@ public class Profile extends Timestamped{
     private Long id;
 
     @NotBlank
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne  //테이블 인덱스(키)가 이상하게 걸려있었음, 테이블 삭제하고 다시 실행했더니 작동
     @JoinColumn(name = "userId")
     private User user; // = new User(); 객체에 값이 안담겨있는데 user 엔티티에 있는 정보를 가져올 수 있나?
 
