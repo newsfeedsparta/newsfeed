@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -26,9 +28,9 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(userService.signup(req));
-        }
-        catch (Exception e) {
-            return null;
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -39,18 +41,19 @@ public class UserController {
                     .status(HttpStatus.OK)
                     .body(userService.login(req, res));
         } catch (Exception e) {
-            return null;
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @DeleteMapping("/my")
-    public String withdraw(@RequestBody WithdrawRequestDto wreq, HttpServletRequest hreq) {
+    @DeleteMapping("/my/withdraw")
+    public ResponseEntity<String> withdraw(@RequestBody WithdrawRequestDto wreq, HttpServletRequest hreq) {
         try {
             userService.withdraw(wreq, hreq);
+            return ResponseEntity.ok("withdraw-success");
         } catch (Exception e) {
-            return "withdraw-success";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("withdraw-failed");
         }
-        return "withdraw-error";
     }
 
     @GetMapping("/my/posts")

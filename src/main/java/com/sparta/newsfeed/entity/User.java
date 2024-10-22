@@ -21,11 +21,11 @@ public class User {
 
     @Size(min = 5, max = 50)
     @NotBlank
-    @Column (unique = true)
+    @Column(unique = true)
     private String username;
 
     @Email
-    @Column (unique = true)
+    @Column(unique = true)
     private String email;
 
     @NotBlank
@@ -35,10 +35,10 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // 프로필이랑 1:1 관계
     private Profile profile;
 
-    @OneToMany(mappedBy = "user") // 포스트랑 1:n 관계
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE) // 포스트랑 1:n 관계
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "user")  // 친구랑 1:n 관계
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)  // 친구랑 1:n 관계
     private List<Friend> friends;
 
     public User(String username, String password, String email) {

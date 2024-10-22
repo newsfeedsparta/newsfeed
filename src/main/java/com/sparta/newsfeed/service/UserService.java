@@ -51,11 +51,11 @@ public class UserService {
 
     @Transactional
     public UserResponseDto login(LoginRequestDto requestDto, HttpServletResponse res) {
-        String username = requestDto.getUsername();
+        String email = requestDto.getEmail();
         String password = requestDto.getPassword();
 
         // 사용자 확인
-        User user = userRepository.findByUsername(username).orElseThrow(
+        User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("등록된 사용자가 없습니다.")
         );
 
@@ -65,19 +65,23 @@ public class UserService {
         }
 
         // JWT 생성 및 쿠키에 저장 후 Response 객체에 추가
-        String token = jwtUtil.createToken(user.getUsername());
+        String token = jwtUtil.createToken(user.getEmail());
         jwtUtil.addJwtToCookie(token, res);
 
         return user.to();
     }
 
+    @Transactional
     public void withdraw(WithdrawRequestDto wreq, HttpServletRequest hreq) {
-        // hreq에 있는 유저가 존재하는지 확인
+        // hreq에 담긴 유저가 존재하는지 확인
+        User user = (User) hreq.getAttribute("user");
 
-        // hreq의 비밀번호와 wreq의 비밀번호가 일치하는지 확인
+        // 유저의 비밀번호와 wreq의 비밀번호가 일치하는지 확인
+        if (!passwordEncoder.matches(wreq.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
 
-        // 일치한다면 db에서 유저 정보 지우기
-
+        userRepository.delete(user);
     }
 
     public void getMyPosts(HttpServletRequest req) {
