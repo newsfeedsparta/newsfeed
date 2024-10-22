@@ -85,5 +85,6 @@ public class UserService {
     }
 
     public void getMyPosts(HttpServletRequest req) {
+
     }
 }

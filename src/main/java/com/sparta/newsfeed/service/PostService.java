@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final FriendRepository friendRepository;
 
     // 게시물 생성
     @Transactional
@@ -79,14 +80,11 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public PostResponseDto getPostsByFriend(Long friendId, int page, int size) {
+    public PostResponseDto getPostsByFriend(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         // 친구 목록 가져오기 (수락된 친구만)
-
-        // 친구 목록 가져오기 (수락된 친구만)
         List<Long> friendIds = friendRepository.findAcceptedFriendIdsByUserId(userId);
-
 
         // 친구들의 게시물 페이징 처리
         Page<Post> postsPage = postRepository.findByUserIdIn(friendIds, pageable);
@@ -103,7 +101,6 @@ public class PostService {
                 postsPage.getTotalElements(),
                 postDtos
         );
-
 
     }
 }

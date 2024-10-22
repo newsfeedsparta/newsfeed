@@ -47,7 +47,7 @@ public class FriendService {
     //  친구 요청 상태 변경
     public FriendResponseDto updateFriendRequestStatus(Long requestorId, String status) {
         Friend friendRequest = friendRepository.findById(requestorId)
-                .orElseThrow(() -> new FriendRequestNotFoundException("Friend request not found for receiver ID: " + receiverId));
+                .orElseThrow(() -> new IllegalArgumentException("친구 요청을 찾을 수 없습니다."));
         friendRequest.setStatus(FriendStatus.valueOf(status)); // 상태 변경
         friendRepository.save(friendRequest); // 변경된 요청 저장
 
@@ -94,7 +94,7 @@ public class FriendService {
     }
 
 
-    // 2, 친의 게시물 조회 (페이징 처리)
+    // 2, 친구의 게시물 조회 (페이징 처리)
     public PostResponseDto getFriendsPosts(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> postsPage = postRepository.findByUserIdIn(friendRepository.findAcceptedFriendIdsByUserId(userId), pageable);
@@ -106,10 +106,10 @@ public class FriendService {
                 .map(post -> {
                     PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
                     postInfo.setPostId(post.getId());
-                    postInfo.setContent(post.getContent());
+                    postInfo.setContents(post.getContents());
                     postInfo.setCreatedAt(post.getCreatedAt());
                     return postInfo;
-                }).toList());
+                }).toList().toString());
         return response;
     }
 
