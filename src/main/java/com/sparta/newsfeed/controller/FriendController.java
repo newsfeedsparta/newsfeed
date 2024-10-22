@@ -62,7 +62,8 @@ public class FriendController {
         }
 
         // 로그인한 사용자와 요청한 사용자 ID가 일치하는지 확인
-        if (!currentUser.getId().equals(userId)) {
+
+        if (!currentUser.getId().equals(id)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 

@@ -26,5 +26,8 @@ public class Friend {
     private FriendStatus status; // 요청 상태
 
 
+    public Long getReceiverId() {
+        return receiver != null ? receiver.getId() : null;
+    }
 }
 

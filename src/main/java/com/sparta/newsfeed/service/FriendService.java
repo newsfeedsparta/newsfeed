@@ -1,9 +1,11 @@
 package com.sparta.newsfeed.service;
 
+import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.dto.friend.FriendRequestDto;
 import com.sparta.newsfeed.dto.friend.FriendResponseDto;
 import com.sparta.newsfeed.entity.Friend;
 import com.sparta.newsfeed.entity.FriendStatus;
+import com.sparta.newsfeed.entity.Post;
 import com.sparta.newsfeed.entity.User;
 import com.sparta.newsfeed.exception.FriendRequestNotFoundException;
 import com.sparta.newsfeed.repository.FriendRepository;
@@ -92,7 +94,27 @@ public class FriendService {
     }
 
 
-    // 2. 친구의 게시물 조회
+    // 2, 친의 게시물 조회 (페이징 처리)
+    public PostResponseDto getFriendsPosts(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> postsPage = postRepository.findByUserIdIn(friendRepository.findAcceptedFriendIdsByUserId(userId), pageable);
+
+        PostResponseDto response = new PostResponseDto();
+        response.setPage(page);
+        response.setTotalPages(postsPage.getTotalPages());
+        response.setContents(postsPage.getContent().stream()
+                .map(post -> {
+                    PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
+                    postInfo.setPostId(post.getId());
+                    postInfo.setContent(post.getContent());
+                    postInfo.setCreatedAt(post.getCreatedAt());
+                    return postInfo;
+                }).toList());
+        return response;
+    }
+
+
+
 
 
     // 3. 친구 삭제

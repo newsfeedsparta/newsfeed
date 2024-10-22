@@ -74,4 +74,7 @@ public class PostService {
 
         postRepository.delete(post);
     }
+
+    public PostResponseDto getPostsByFriend(Long friendId, int page, int size) {
+    }
 }
