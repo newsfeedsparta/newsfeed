@@ -27,5 +27,4 @@ public class Post extends Timestamped{
     @Column (name = "contents")
     private String contents;
 
-
 }
