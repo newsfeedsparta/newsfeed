@@ -1,14 +1,13 @@
 package com.sparta.newsfeed.dto.user;
 
-import com.sparta.newsfeed.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
+@AllArgsConstructor
 public class UserResponseDto {
-
-    private String user;
-
-    public UserResponseDto(User user) {
-        this.user = user.getUsername();
-    }
+    private String username;
+    private String email;
 }
