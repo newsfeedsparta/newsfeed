@@ -1,13 +1,11 @@
 package com.sparta.newsfeed.dto.user;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
-@AllArgsConstructor
-public class UserResponseDto {
+@Getter
+public class LoginRequestDto {
     private String username;
-    private String email;
+    private String password;
 }
