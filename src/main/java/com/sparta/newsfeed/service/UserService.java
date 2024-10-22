@@ -1,10 +1,12 @@
 package com.sparta.newsfeed.service;
 
+import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.dto.user.LoginRequestDto;
 import com.sparta.newsfeed.dto.user.SignupRequestDto;
 import com.sparta.newsfeed.dto.user.UserResponseDto;
 import com.sparta.newsfeed.dto.user.WithdrawRequestDto;
 import com.sparta.newsfeed.entity.User;
+import com.sparta.newsfeed.repository.PostRepository;
 import com.sparta.newsfeed.repository.UserRepository;
 import com.sparta.newsfeed.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -84,6 +88,11 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void getMyPosts(HttpServletRequest req) {
+    public List<PostResponseDto> getMyPosts(HttpServletRequest req) {
+        // 유저 확인
+        User user = (User) req.getAttribute("user");
+
+
+        return null;
     }
 }

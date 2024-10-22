@@ -57,9 +57,14 @@ public class UserController {
     }
 
     @GetMapping("/my/posts")
-    public ResponseEntity<PostResponseDto> getMyPosts(HttpServletRequest req) {
-
-        userService.getMyPosts(req);
-        return null;
+    public ResponseEntity<List<PostResponseDto>> getMyPosts(HttpServletRequest req) {
+        try {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(userService.getMyPosts(req));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
