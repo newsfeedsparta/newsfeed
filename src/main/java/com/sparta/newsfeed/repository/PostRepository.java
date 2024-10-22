@@ -1,4 +1,15 @@
 package com.sparta.newsfeed.repository;
 
-public interface PostRepository {
+import com.sparta.newsfeed.entity.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface PostRepository extends JpaRepository<Post, Long> {
+    // 키워드로 게시물 조회
+    List<Post> findByContentsContaining(String keyword);
+    // 친구의 게시물만 조회
+    Page<Post> findByUserIdIn(List<Long> userIds, Pageable pageable);
 }
