@@ -8,14 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-
 public interface FriendRepository extends JpaRepository<Friend, Long> {
+    // 수락된 친구 목록 조회
+    Page<Friend> findByUserIdAndStatus(Long userId, FriendStatus status, Pageable pageable);
 
- // 수락된 친구 목록 조회
- Page<Friend> findByUserIdAndStatus(Long userId, FriendStatus status, Pageable pageable);
+    // 친구 삭제 (두 메소드를 작성해야 함)
+    void deleteByUserIdAndFriendId(Long userId, Long friendId); // A가 B를 삭제할 때
 
- // 친구 삭제 (두 메소드를 작성해야 함)
- void deleteByUserIdAndFriendId(Long userId, Long friendId); // A가 B를 삭제할 때
- void deleteByFriendIdAndUserId(Long friendId, Long userId); // B가 A를 삭제할 때
+    void deleteByFriendIdAndUserId(Long friendId, Long userId); // B가 A를 삭제할 때
 
+    List<Friend> findByReceiverId(Long receiverId); // 수신자 ID로 친구 요청 목록 조회
 }

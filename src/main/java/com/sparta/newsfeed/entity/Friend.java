@@ -12,18 +12,19 @@ public class Friend {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 친구 요청 ID
 
-    @NotBlank
     @ManyToOne
-    @JoinColumn(name = "userId")
-    private User user;
+    @JoinColumn(name = "requestorId")
+    private User requestor; // 요청을 보낸 사용자
 
-    @NotBlank
-    @Column(name = "receiverId")
-    private Long receiverId;
+    @ManyToOne
+    @JoinColumn(name = "receiverId")
+    private User receiver; // 요청을 받은 사용자
 
     @Enumerated(EnumType.STRING)
-    private FriendStatus status;
+    private FriendStatus status; // 요청 상태
+
 
 }
+
