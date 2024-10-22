@@ -28,7 +28,8 @@ public class UserController {
                     .body(userService.signup(req));
         }
         catch (Exception e) {
-            return null;
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -39,7 +40,8 @@ public class UserController {
                     .status(HttpStatus.OK)
                     .body(userService.login(req, res));
         } catch (Exception e) {
-            return null;
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
