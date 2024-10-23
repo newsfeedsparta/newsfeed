@@ -1,5 +1,6 @@
 package com.sparta.newsfeed.service;
 
+import com.sparta.newsfeed.dto.UpdatePasswordRequestDto;
 import com.sparta.newsfeed.dto.user.LoginRequestDto;
 import com.sparta.newsfeed.dto.user.SignupRequestDto;
 import com.sparta.newsfeed.dto.user.UserResponseDto;
@@ -7,10 +8,10 @@ import com.sparta.newsfeed.dto.user.WithdrawRequestDto;
 import com.sparta.newsfeed.entity.User;
 import com.sparta.newsfeed.repository.UserRepository;
 import com.sparta.newsfeed.util.JwtUtil;
+import com.sparta.newsfeed.util.PasswordEncoder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,10 @@ public class UserService {
         Optional<User> checkEmail = userRepository.findByEmail(email);
         if (checkEmail.isPresent()) {
             throw new IllegalArgumentException("중복된 Email 입니다.");
+        }
+
+        if (!PasswordEncoder.verifyPassword(password)) {
+            throw new IllegalArgumentException("비밀번호의 형식이 올바르지 않습니다.");
         }
 
         // 비밀번호 확인
@@ -86,5 +91,24 @@ public class UserService {
 
     public void getMyPosts(HttpServletRequest req) {
 
+    }
+
+    public void updatePassword(UpdatePasswordRequestDto ureq, HttpServletRequest hreq) {
+        User user = (User) hreq.getAttribute("user");
+
+        if (!passwordEncoder.matches(ureq.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (ureq.getOldPassword().equals(ureq.getNewPassword())) {
+            throw new IllegalArgumentException("바꾸고자 하는 비밀번호가 현재 비밀번호와 동일합니다.");
+        }
+
+        if (!PasswordEncoder.verifyPassword(ureq.getNewPassword())) {
+            throw new IllegalArgumentException("비밀번호의 형식이 올바르지 않습니다.");
+        }
+
+        user.setPassword(ureq.getNewPassword());
+        userRepository.save(user);
     }
 }

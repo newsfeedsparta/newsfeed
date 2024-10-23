@@ -1,6 +1,7 @@
 package com.sparta.newsfeed.controller;
 
 import com.sparta.newsfeed.dto.Post.PostResponseDto;
+import com.sparta.newsfeed.dto.UpdatePasswordRequestDto;
 import com.sparta.newsfeed.dto.user.LoginRequestDto;
 import com.sparta.newsfeed.dto.user.SignupRequestDto;
 import com.sparta.newsfeed.dto.user.UserResponseDto;
@@ -13,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -61,5 +60,15 @@ public class UserController {
 
         userService.getMyPosts(req);
         return null;
+    }
+
+    @PutMapping("/my/updatePassword")
+    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequestDto ureq, HttpServletRequest hreq) {
+        try {
+            userService.updatePassword(ureq, hreq);
+            return ResponseEntity.ok("update-password-success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("update-password-failed");
+        }
     }
 }
