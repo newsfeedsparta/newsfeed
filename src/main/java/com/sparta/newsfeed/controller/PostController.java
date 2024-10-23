@@ -3,9 +3,11 @@ package com.sparta.newsfeed.controller;
 import com.sparta.newsfeed.dto.Post.PostRequestDto;
 import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,5 +52,36 @@ public class PostController {
         postService.deletePost(id, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    // 내 게시물 조회 (로그인된 사용자만)
+    @GetMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<PostResponseDto> getMyPosts(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+
+        // 현재 사용자 정보를 request에서 가져옵니다
+        User currentUser = (User) request.getAttribute("user");
+
+        // null 체크
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 인증되지 않은 경우
+        }
+
+        // 로그인한 사용자와 요청한 사용자 ID가 일치하는지 확인
+        if (!currentUser.getId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 권한이 없는 경우
+        }
+
+        // 내 게시물 조회
+        PostResponseDto postResponse = postService.getPostsByUserId(userId, page, size);
+        return new ResponseEntity<>(postResponse, HttpStatus.OK);
+    }
+
+
+
+
 
 }

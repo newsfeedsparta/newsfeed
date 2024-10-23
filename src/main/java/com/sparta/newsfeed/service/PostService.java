@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,27 +81,33 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public PostResponseDto getPostsByFriend(Long userId, int page, int size) {
+
+
+    // 내 게시물 조회
+    @Transactional
+    public PostResponseDto getPostsByUserId(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        Page<Post> postsPage = postRepository.findByUserId(userId, pageable); // userId로 게시물 조회
 
-        // 친구 목록 가져오기 (수락된 친구만)
-        List<Long> friendIds = friendRepository.findAcceptedFriendIdsByUserId(userId);
-
-        // 친구들의 게시물 페이징 처리
-        Page<Post> postsPage = postRepository.findByUserIdIn(friendIds, pageable);
-
-        // 게시물 리스트 변환
-        List<PostResponseDto> postDtos = postsPage.getContent().stream()
-                .map(PostResponseDto::fromEntity)
-                .collect(Collectors.toList());
-
-        // PostResponseDto로 페이징 정보와 게시물 리스트를 함께 반환
-        return PostResponseDto.createPagedResponse(
-                page,
-                postsPage.getTotalPages(),
-                postsPage.getTotalElements(),
-                postDtos
-        );
-
+        PostResponseDto response = new PostResponseDto();
+        response.setPage(page);
+        response.setTotalPages(postsPage.getTotalPages());
+        response.setContents(postsPage.getContent().stream()
+                .map(post -> {
+                    PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
+                    postInfo.setPostId(post.getId());
+                    postInfo.setContents(post.getContents());
+                    postInfo.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));
+                    return postInfo;
+                }).toList().toString());
+        return response;
     }
+
+
+
+
+
+
+
+
 }
