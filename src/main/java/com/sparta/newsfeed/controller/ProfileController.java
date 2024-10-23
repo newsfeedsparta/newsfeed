@@ -29,6 +29,7 @@ public class ProfileController {
         ProfileResponseDto responseDto = profileService.getProfile(id);
         return ResponseEntity.ok(responseDto);
     }
+
     // 프로필 수정
     @PutMapping("/{id}")
     public ResponseEntity<ProfileResponseDto> updateProfile(@PathVariable Long id, @RequestBody ProfileRequestDto requestDto) {

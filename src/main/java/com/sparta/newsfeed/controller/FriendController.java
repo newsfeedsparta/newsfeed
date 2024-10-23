@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/users/{id}/friends")
 public class FriendController {
     private FriendService friendService; // 친구 서비스 주입
 
     // 친구 요청 생성 API
-    @PostMapping("/{id}/friends/{friendId}/request")
+    @PostMapping("{friendId}/request")
     public ResponseEntity<FriendResponseDto> createFriendRequest(
             @PathVariable Long id,
             @RequestBody FriendRequestDto friendRequestDto) {
@@ -28,7 +28,7 @@ public class FriendController {
     }
 
     // 친구 요청 상태 변경 API
-    @PutMapping("/{id}/friends/{friendId}")
+    @PutMapping("{friendId}")
     public ResponseEntity<FriendResponseDto> updateFriendRequest(@PathVariable Long requestId, @RequestParam String status) {
         FriendResponseDto updatedRequest = friendService.updateFriendRequestStatus(requestId, status);
         return ResponseEntity.ok(updatedRequest); // 변경된 요청 반환
@@ -45,7 +45,7 @@ public class FriendController {
     private PostService postService;
 
     // 1. 친구 목록 조회 (로그인 상태, 페이징 처리, ACCEPTED 상태만)
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<FriendResponseDto> getFriends(@PathVariable Long id,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "10") int size,
@@ -74,7 +74,7 @@ public class FriendController {
 
 
 //    // 2. 친구의 게시물 조회 (로그인된 사용자가 친구의 게시물만 조회할 수 있도록)
-//    @GetMapping("/{friendId}/posts")
+//    @GetMapping("/posts")
 //    public ResponseEntity<?> getFriendPosts(
 //            @PathVariable Long userId,
 //            @PathVariable Long friendId,

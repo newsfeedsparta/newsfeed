@@ -21,6 +21,7 @@ public class PostController {
     private final PostService postService;
 
 
+    // 게시물 생성
     @PostMapping("/")
     public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto postRequestDto, @RequestParam Long userId) {
         PostResponseDto createdPost = postService.createPost(postRequestDto, userId);
@@ -56,7 +57,7 @@ public class PostController {
     }
 
     // 내 게시물 조회 (로그인된 사용자만)
-    @GetMapping("/{userId}")
+    @GetMapping("/my/posts")
     public ResponseEntity<PostResponseDto> getMyPosts(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
