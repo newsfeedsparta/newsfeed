@@ -3,12 +3,9 @@ package com.sparta.newsfeed.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -30,8 +27,5 @@ public class Post extends Timestamped {
     private String contents;
 
 
-
-
-
-    }
+}
 

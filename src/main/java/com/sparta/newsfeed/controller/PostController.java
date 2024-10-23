@@ -56,7 +56,7 @@ public class PostController {
     }
 
     // 내 게시물 조회 (로그인된 사용자만)
-    @GetMapping
+    @GetMapping("/{userId}")
     public ResponseEntity<PostResponseDto> getMyPosts(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,

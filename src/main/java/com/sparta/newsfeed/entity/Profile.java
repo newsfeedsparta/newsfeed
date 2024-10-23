@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Profile extends Timestamped{
+public class Profile extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class Profile extends Timestamped{
 
     //프로필 생성
     public static Profile from(ProfileRequestDto requestDto, User user) {
-        Profile profile =new Profile();
+        Profile profile = new Profile();
         profile.initData(requestDto, user);
         return profile;
     }

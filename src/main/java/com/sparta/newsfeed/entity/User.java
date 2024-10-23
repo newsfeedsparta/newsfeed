@@ -38,8 +38,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE) // 포스트랑 1:n 관계
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)  // 친구랑 1:n 관계
-    private List<Friend> friends;
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)  // 친구랑 1:n 관계
+//    private List<Friend> friends;  삭제 -> 친구 조회하는 APi 작성, 자체적으로 조회하도록
 
     public User(String username, String password, String email) {
         this.username = username;
