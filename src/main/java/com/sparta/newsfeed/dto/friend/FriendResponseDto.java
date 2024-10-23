@@ -15,7 +15,6 @@ public class FriendResponseDto {
     private int page; // 현재 페이지
     private int totalPages; // 총 페이지 수
 
-    @Data
     // 친구 정보
     public static class FriendInfo {
         private Long receiverId; // 친구의 사용자 ID

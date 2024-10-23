@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class FriendRequestDto {
-    private Long friendId; // 친구 요청을 보낼 사용자 ID
+    private Long requesterId; // 친구 요청을 보낼 사용자 ID
     private Long receiverId; // 친구요청을 받을 사용자
 }
