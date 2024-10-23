@@ -1,5 +1,6 @@
 package com.sparta.newsfeed.controller;
 
+import com.sparta.newsfeed.dto.ErrorResponseDto;
 import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.dto.UpdatePasswordRequestDto;
 import com.sparta.newsfeed.dto.user.LoginRequestDto;
@@ -22,53 +23,59 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/users/signup")
-    public ResponseEntity<UserResponseDto> signup(@RequestBody SignupRequestDto req) {
+    public ResponseEntity<Object> signup(@RequestBody SignupRequestDto req) {
         try {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(userService.signup(req));
         } catch (Exception e) {
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponseDto(e.getMessage()));
         }
     }
 
     @PostMapping("/users/login")
-    public ResponseEntity<UserResponseDto> login(@RequestBody LoginRequestDto req, HttpServletResponse res) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequestDto req, HttpServletResponse res) {
         try {
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(userService.login(req, res));
         } catch (Exception e) {
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponseDto(e.getMessage()));
         }
     }
 
-    @DeleteMapping("/my/withdraw")
-    public ResponseEntity<String> withdraw(@RequestBody WithdrawRequestDto wreq, HttpServletRequest hreq) {
+    @DeleteMapping("/users/withdraw")
+    public ResponseEntity<Object> withdraw(@RequestBody WithdrawRequestDto wreq, HttpServletRequest hreq) {
         try {
             userService.withdraw(wreq, hreq);
             return ResponseEntity.ok("withdraw-success");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("withdraw-failed");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponseDto(e.getMessage()));
         }
     }
 
-    @GetMapping("/my/posts")
+    @GetMapping("/users/posts")
     public ResponseEntity<PostResponseDto> getMyPosts(HttpServletRequest req) {
 
         userService.getMyPosts(req);
         return null;
     }
 
-    @PutMapping("/my/updatePassword")
-    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequestDto ureq, HttpServletRequest hreq) {
+    @PutMapping("/users/updatePassword")
+    public ResponseEntity<Object> updatePassword(@RequestBody UpdatePasswordRequestDto ureq, HttpServletRequest hreq) {
         try {
             userService.updatePassword(ureq, hreq);
             return ResponseEntity.ok("update-password-success");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("update-password-failed");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponseDto(e.getMessage()));
         }
     }
 }

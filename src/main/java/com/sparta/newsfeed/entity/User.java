@@ -32,6 +32,9 @@ public class User {
     @Column
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // 프로필이랑 1:1 관계
     private Profile profile;
 
@@ -45,6 +48,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+        status = UserStatus.Active;
     }
 
     public UserResponseDto to() {

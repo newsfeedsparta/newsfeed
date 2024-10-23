@@ -108,7 +108,8 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호의 형식이 올바르지 않습니다.");
         }
 
-        user.setPassword(ureq.getNewPassword());
+        String encodedPassword = passwordEncoder.encode(ureq.getNewPassword());
+        user.setPassword(encodedPassword);
         userRepository.save(user);
     }
 }

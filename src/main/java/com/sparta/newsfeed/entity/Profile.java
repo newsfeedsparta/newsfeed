@@ -1,6 +1,8 @@
 package com.sparta.newsfeed.entity;
 
-import com.sparta.newsfeed.dto.profile.ProfileRequestDto;
+import com.sparta.newsfeed.dto.profile.CreateProfileRequestDto;
+import com.sparta.newsfeed.dto.profile.ProfileResponseDto;
+import com.sparta.newsfeed.dto.profile.UpdateProfileRequestDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Profile extends Timestamped {
+public class Profile extends Timestamped{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,20 +28,33 @@ public class Profile extends Timestamped {
 
     @Size(max = 500)
     @NotEmpty
-    @Column(name = "selfIntroduction")
+    @Column
     private String selfIntroduction;
 
-
     //프로필 생성
-    public static Profile from(ProfileRequestDto requestDto, User user) {
+    public static Profile from(CreateProfileRequestDto requestDto, User user) {
         Profile profile = new Profile();
-        profile.initData(requestDto, user);
+        profile.init(requestDto, user);
         return profile;
     }
 
     //프로필 데이터 초기화
-    public void initData(ProfileRequestDto requestDto, User user) {
+    public void init(CreateProfileRequestDto requestDto, User user) {
         this.user = user;
         this.selfIntroduction = requestDto.getSelfIntroduction();
+    }
+
+    public void update(UpdateProfileRequestDto ureq){
+        this.selfIntroduction = ureq.getSelfIntroduction();
+    }
+
+    public ProfileResponseDto to(){
+        return new ProfileResponseDto(
+                id,
+                user.to(),
+                selfIntroduction,
+                getCreatedAt(),
+                getModifiedAt()
+        );
     }
 }
