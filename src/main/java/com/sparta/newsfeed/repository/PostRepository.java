@@ -11,5 +11,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 키워드로 게시물 조회
     List<Post> findByContentsContaining(String keyword);
     // 내 게시물만 조회
-    Page<Post> findByUserId(List<Long> userId, Pageable pageable);
+    Page<Post> findByUserId(Long userId, Pageable pageable);
 }

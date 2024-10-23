@@ -30,12 +30,8 @@ public class Post extends Timestamped {
     private String contents;
 
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now(); // 기본값으로 현재 시간 설정
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now(); // 엔티티가 생성될 때 현재 시간으로 설정
+
 
     }
-}
+

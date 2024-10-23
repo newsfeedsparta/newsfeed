@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,10 +84,10 @@ public class PostService {
 
 
 
-    // 내 게시물 조회
+    // 내 게시물 조회 (페이징, 수정일 기준으로 내림차순 정렬)
     @Transactional
     public PostResponseDto getPostsByUserId(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
         Page<Post> postsPage = postRepository.findByUserId(userId, pageable); // userId로 게시물 조회
 
         PostResponseDto response = new PostResponseDto();

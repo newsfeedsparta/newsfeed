@@ -14,8 +14,10 @@ import com.sparta.newsfeed.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,9 +96,9 @@ public class FriendService {
     }
 
 
-    // 2, 친구의 게시물 조회 (페이징 처리)
+    // 2, 친구의 게시물 조회 (페이징 처리,수정일 기준으로 내림차순 정렬)
     public PostResponseDto getFriendsPosts(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
         Page<Post> postsPage = friendRepository.findByFreindPosts(friendRepository.findAcceptedFriendId(userId), pageable);
 
         PostResponseDto response = new PostResponseDto();
@@ -107,7 +109,7 @@ public class FriendService {
                     PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
                     postInfo.setPostId(post.getId());
                     postInfo.setContents(post.getContents());
-                    postInfo.setCreatedAt(post.getCreatedAt());
+                    postInfo.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));
                     return postInfo;
                 }).toList().toString());
         return response;

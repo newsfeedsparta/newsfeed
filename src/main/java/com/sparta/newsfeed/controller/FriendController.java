@@ -9,7 +9,6 @@ import com.sparta.newsfeed.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,7 +46,6 @@ public class FriendController {
 
     // 1. 친구 목록 조회 (로그인 상태, 페이징 처리, ACCEPTED 상태만)
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FriendResponseDto> getFriends(@PathVariable Long id,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "10") int size,
@@ -111,7 +109,6 @@ public class FriendController {
 
     // 3. 친구 삭제
     @DeleteMapping("/{friendId}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> deleteFriend(
             @PathVariable Long id,
             @PathVariable Long friendId,
