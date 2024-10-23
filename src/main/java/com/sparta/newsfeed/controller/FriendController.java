@@ -97,9 +97,10 @@ public class FriendController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        // 친구의 게시물 조회
+        /*// 친구의 게시물 조회
         PostResponseDto postResponse = friendService.getFriendPosts(friendId, page, size);
         return new ResponseEntity<>(postResponse, HttpStatus.OK);
+*/      return null;
     }
 
 

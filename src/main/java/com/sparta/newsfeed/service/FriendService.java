@@ -28,7 +28,7 @@ public class FriendService {
 
     private  final FriendRepository friendRepository;
     private  final UserRepository userRepository;
-    private  final postRepository postRepository;
+    private  final PostRepository postRepository;
 
 
     // 친구 요청 생성 및 상태 설정

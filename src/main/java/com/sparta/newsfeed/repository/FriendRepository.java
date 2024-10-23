@@ -22,7 +22,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     Page<Friend> findFriends(@Param("userId") Long userId, @Param("status") FriendStatus status, Pageable pageable);
 
     @Modifying
-    @Query("DELETE FROM Friend WHERE (Friend.requestor.id = :requestorId AND Friend.receiver.id = :receiverId) OR (Friend.requestor.id = :receiverId AND Friend.receiver.id = :requestorId)")
+    @Query("DELETE FROM Friend friend WHERE (friend.requestor.id = :requestorId AND friend.receiver.id = :receiverId) OR (friend.requestor.id = :receiverId AND friend.receiver.id = :requestorId)")
     void deleteFriendship(@Param("requestorId") Long requestorId, @Param("receiverId") Long receiverId);
 
 
