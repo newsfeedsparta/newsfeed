@@ -16,6 +16,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserId(Long userId, Pageable pageable);
 
     // 친구 게시물 조회
-    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
-    Page<Post> findFriendPosts(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.user.id = :friendId ORDER BY p.modifiedAt DESC")
+    Page<Post> findFriendPosts(@Param("friendId") Long friendId, Pageable pageable);
+
 }

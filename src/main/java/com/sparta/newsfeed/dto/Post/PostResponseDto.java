@@ -49,6 +49,8 @@ public class PostResponseDto {
         this.currentPage = page; // 현재 페이지 설정
     }
 
+
+
     public static class PostInfo {
         private Long postId; // 게시물 ID
         private String content; // 게시물 내용

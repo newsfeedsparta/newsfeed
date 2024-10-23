@@ -27,5 +27,6 @@ public class Post extends Timestamped {
     private String contents;
 
 
+
 }
 

@@ -60,15 +60,6 @@ public class FriendService {
         return convertToDto(friendRequest); //변환하여 반환
     }
 
-    // 요청 목록 조회
-//    public List<FriendResponseDto> getFriendRequests(Long receiverId) {
-//        List<Friend> requests = friendRepository.findByReceiverId(receiverId);
-//
-//
-//        return requests.stream()
-//                .map(this::convertToDto)
-//                .collect(Collectors.toList());
-//    }
 
     // Friend 객체를 FriendResponseDto 로 변환
     private FriendResponseDto convertToDto(Friend friend) {
@@ -80,7 +71,7 @@ public class FriendService {
         return friendResponseDto;
     }
 
-    //----------------------------------------------------------------------
+
     // 1. 친구 목록 조회 (ACCEPTED 상태인 친구만)
     public FriendResponseDto getFriends(Long userId, int page, int size) {
 
@@ -110,35 +101,34 @@ public class FriendService {
         return response;
     }
 
-//   //2. 친구 게시물 조회
-//    public PostResponseDto getFriendPosts(Long friendId, int page, int size) {
-//        // Pageable 객체 생성
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        // 친구의 게시물 조회 (게시물은 친구의 ID로 필터링)
-//
-//        Page<Post> postsPage = postRepository.findFriendPosts(friendId, pageable);
-//
-//        // PostResponseDto로 변환하여 반환
-//        PostResponseDto response = new PostResponseDto();
-//
-//        // 게시물 목록 설정
-//        List<PostResponseDto.PostInfo> postInfoList = postsPage.stream()
-//                .map(post -> {
-//                    PostResponseDto.PostInfo info = new PostResponseDto.PostInfo();
-//                    info.setPostId(post.getId());  // 게시물 ID
-//                    info.setContent(post.getContent());  // 게시물 내용
-//                    info.setCreatedAt(post.getCreatedAt());  // 게시물 작성 시간
-//                    return info;
-//                })
-//                .collect(Collectors.toList());
-//
-//        response.setPosts(postInfoList);  // 게시물 목록 설정
-//        response.setPage(page);  // 현재 페이지
-//        response.setTotalPages(postsPage.getTotalPages());  // 총 페이지 수
-//
-//        return response;
-//    }
+   //2. 친구 게시물 조회
+    public PostResponseDto getFriendPosts(Long friendId, int page, int size) {
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        Page<Post> postsPage = postRepository.findFriendPosts(friendId, pageable);
+
+        // PostResponseDto로 변환하여 반환
+        PostResponseDto response = new PostResponseDto();
+
+        // 게시물 목록 설정
+        List<PostResponseDto.PostInfo> postInfoList = postsPage.stream()
+                .map(post -> {
+                    PostResponseDto.PostInfo info = new PostResponseDto.PostInfo();
+                    info.setPostId(post.getId());  // 게시물 ID
+                    info.setContents(post.getContents());  // 게시물 내용
+                    info.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));  // 게시물 작성 시간
+                    return info;
+                })
+                .collect(Collectors.toList());
+
+        response.setPosts(postInfoList);  // 게시물 목록 설정
+        response.setPage(page);  // 현재 페이지
+        response.setTotalPages(postsPage.getTotalPages());  // 총 페이지 수
+
+        return response;
+    }
 
 
 
