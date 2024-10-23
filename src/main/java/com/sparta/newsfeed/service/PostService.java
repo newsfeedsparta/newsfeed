@@ -8,6 +8,7 @@ import com.sparta.newsfeed.exception.PostNotFoundException;
 import com.sparta.newsfeed.repository.FriendRepository;
 import com.sparta.newsfeed.repository.PostRepository;
 import com.sparta.newsfeed.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,9 +30,8 @@ public class PostService {
 
     // 게시물 생성
     @Transactional
-    public PostResponseDto createPost(PostRequestDto postRequestDto, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public PostResponseDto createPost(PostRequestDto postRequestDto, HttpServletRequest request) {
+        User user = (User) request.getAttribute("user");
 
         Post post = new Post();
         post.setUser(user);
@@ -42,8 +42,18 @@ public class PostService {
     }
 
     // 모든 게시물 조회
-    public List<PostResponseDto> getAllPosts() {
+    public List<PostResponseDto> getAllPosts(HttpServletRequest request) {
+        User user = (User) request.getAttribute("user");
         return postRepository.findAll().stream()
+                .map(PostResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    // 내 게시물 조회
+    public List<PostResponseDto> getMyPosts(int page, int size, HttpServletRequest request) {
+        User user = (User) request.getAttribute("user");
+        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
+        return postRepository.findByUserId(user.getId(),pageable).stream()
                 .map(PostResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -56,11 +66,12 @@ public class PostService {
     }
 
     // 게시물 수정
-    public PostResponseDto updatePost(Long postId, PostRequestDto postRequestDto, Long userId) {
+    public PostResponseDto updatePost(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
+        User user = (User) request.getAttribute("user");
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("게시물을 찾을 수 없습니다."));
 
-        if (!post.getUser().getId().equals(userId)) {
+        if (!post.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("게시물을 수정할 권한이 없습니다.");
         }
 
@@ -71,11 +82,12 @@ public class PostService {
     }
 
     // 게시물 삭제
-    public void deletePost(Long postId, Long userId) {
+    public void deletePost(Long postId, HttpServletRequest request) {
+        User user = (User) request.getAttribute("user");
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("게시물을 찾을 수 없습니다."));
 
-        if (!post.getUser().getId().equals(userId)) {
+        if (!post.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("게시물을 삭제할 권한이 없습니다.");
         }
 
@@ -83,32 +95,25 @@ public class PostService {
     }
 
 
-
-    // 내 게시물 조회 (페이징, 수정일 기준으로 내림차순 정렬)
-    @Transactional
-    public PostResponseDto getPostsByUserId(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
-        Page<Post> postsPage = postRepository.findByUserId(userId, pageable); // userId로 게시물 조회
-
-        PostResponseDto response = new PostResponseDto();
-        response.setPage(page);
-        response.setTotalPages(postsPage.getTotalPages());
-        response.setContents(postsPage.getContent().stream()
-                .map(post -> {
-                    PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
-                    postInfo.setPostId(post.getId());
-                    postInfo.setContents(post.getContents());
-                    postInfo.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));
-                    return postInfo;
-                }).toList().toString());
-        return response;
-    }
-
-
-
-
-
-
+//    // 내 게시물 조회 (페이징, 수정일 기준으로 내림차순 정렬)
+//    @Transactional
+//    public PostResponseDto getPostsByUserId(Long userId, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
+//        Page<Post> postsPage = postRepository.findByUserId(userId, pageable); // userId로 게시물 조회
+//
+//        PostResponseDto response = new PostResponseDto();
+//        response.setPage(page);
+//        response.setTotalPages(postsPage.getTotalPages());
+//        response.setContents(postsPage.getContent().stream()
+//                .map(post -> {
+//                    PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
+//                    postInfo.setPostId(post.getId());
+//                    postInfo.setContents(post.getContents());
+//                    postInfo.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));
+//                    return postInfo;
+//                }).toList().toString());
+//        return response;
+//    }
 
 
 }
