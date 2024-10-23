@@ -11,6 +11,7 @@ import com.sparta.newsfeed.exception.FriendRequestNotFoundException;
 import com.sparta.newsfeed.repository.FriendRepository;
 import com.sparta.newsfeed.repository.PostRepository;
 import com.sparta.newsfeed.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +23,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FriendService {
-    private FriendRepository friendRepository;
-    private UserRepository userRepository;
-    private PostRepository postRepository;
+
+    private  final FriendRepository friendRepository;
+    private  final UserRepository userRepository;
+    private  final postRepository postRepository;
+
 
     // 친구 요청 생성 및 상태 설정
     public FriendResponseDto createFriendRequest(Long requestorId, FriendRequestDto friendRequestDto) {
@@ -76,64 +80,77 @@ public class FriendService {
         return friendResponseDto;
     }
 
+    //----------------------------------------------------------------------
+    // 1. 친구 목록 조회 (ACCEPTED 상태인 친구만)
     public FriendResponseDto getFriends(Long userId, int page, int size) {
+
+        // Pageable 객체 생성
         Pageable pageable = PageRequest.of(page, size);
 
-        // 1. 친구 목록 조회 (ACCEPTED 상태인 친구만)
-        List<Friend> friendsPage = friendRepository.findFriends(userId, FriendStatus.ACCEPTED);
+        // ACCEPTED 상태인 친구만 페이징 처리하여 가져오기
+        Page<Friend> friendsPage = friendRepository.findFriends(userId, FriendStatus.ACCEPTED, pageable);
 
+        // FriendResponseDto로 변환하여 반환
         FriendResponseDto response = new FriendResponseDto();
-        response.setPage(page);
-//        response.setTotalPages(friendsPage.getTotalPages());
-        response.setFriends(friendsPage.stream()
+
+
+        // 친구 목록 설정
+        List<FriendResponseDto.FriendInfo> friendInfoList = friendsPage.stream()
                 .map(friend -> {
                     FriendResponseDto.FriendInfo info = new FriendResponseDto.FriendInfo();
-                    info.setReceiverId(friend.getReceiverId());
-                    // 여기서 추가적인 사용자 정보 (id, 이름, 자기소개) 조회 로직 필요
+                    info.setReceiverId(friend.getReceiver().getId());  // 친구의 사용자 ID
+                    info.setUsername(friend.getReceiver().getUsername());  // 친구의 사용자 이름
+                    info.setSelfIntroduction(friend.getReceiver().getProfile().getSelfIntroduction());  // 친구의 자기소개
                     return info;
-                }).toList());
+                })
+                .collect(Collectors.toList());
+
+        response.setFriends(friendInfoList);  // 친구 목록 설정
+
         return response;
     }
 
-
-//    // 2, 친구의 게시물 조회 (페이징 처리,수정일 기준으로 내림차순 정렬)
-//    public PostResponseDto getFriendsPosts(Long userId, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
-//        Page<Post> postsPage = friendRepository.findByFreindPosts(friendRepository.findAcceptedFriendId(userId), pageable);
+//   //2. 친구 게시물 조회
+//    public PostResponseDto getFriendPosts(Long friendId, int page, int size) {
+//        // Pageable 객체 생성
+//        Pageable pageable = PageRequest.of(page, size);
 //
+//        // 친구의 게시물 조회 (게시물은 친구의 ID로 필터링)
+//
+//        Page<Post> postsPage = postRepository.findFriendPosts(friendId, pageable);
+//
+//        // PostResponseDto로 변환하여 반환
 //        PostResponseDto response = new PostResponseDto();
-//        response.setPage(page);
-//        response.setTotalPages(postsPage.getTotalPages());
-//        response.setContents(postsPage.getContent().stream()
+//
+//        // 게시물 목록 설정
+//        List<PostResponseDto.PostInfo> postInfoList = postsPage.stream()
 //                .map(post -> {
-//                    PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo();
-//                    postInfo.setPostId(post.getId());
-//                    postInfo.setContents(post.getContents());
-//                    postInfo.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));
-//                    return postInfo;
-//                }).toList().toString());
+//                    PostResponseDto.PostInfo info = new PostResponseDto.PostInfo();
+//                    info.setPostId(post.getId());  // 게시물 ID
+//                    info.setContent(post.getContent());  // 게시물 내용
+//                    info.setCreatedAt(post.getCreatedAt());  // 게시물 작성 시간
+//                    return info;
+//                })
+//                .collect(Collectors.toList());
+//
+//        response.setPosts(postInfoList);  // 게시물 목록 설정
+//        response.setPage(page);  // 현재 페이지
+//        response.setTotalPages(postsPage.getTotalPages());  // 총 페이지 수
+//
 //        return response;
 //    }
-//
-//
-//
-//
-//
-//    // 3. 친구 삭제
-//    public void deleteFriend(Long userId, Long friendId) {
-//        //현재 사용자의 친구 관계 삭제
-//        friendRepository.deleteByUserIdAndFriendId(userId, friendId);
-//        // 상대방의 친구 목록에서 삭제
-//        friendRepository.deleteByUserIdAndFriendId(friendId, userId);
-//        //  A가 B를 친구 목록에서 삭제할 경우, B의 친구 목록에서도  A가 삭제됨.
-//        // 친구 삭제 후 다시 친구 요청을 할 수 있음. (데이터베이스에서 기록 삭제)
-//
-//    }
 
-//    // 친구 관계가 수락되었는지 확인하는 메소드
-//    public boolean isFriendAccepted(Long userId, Long friendId) {
-//        return friendRepository.findById(friendId)
-//                .map(friend -> friend.getStatus() == FriendStatus.ACCEPTED)
-//                .orElse(false);
-//    }
-}
+
+
+
+
+    // 3. 친구 삭제
+
+    public void deleteFriend(Long userId, Long friendId) {
+        // 친구 관계 삭제
+        friendRepository.deleteFriendship(userId, friendId);
+    }
+
+    }
+
+

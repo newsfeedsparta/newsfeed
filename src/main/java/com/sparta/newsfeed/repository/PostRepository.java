@@ -4,6 +4,8 @@ import com.sparta.newsfeed.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -12,4 +14,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByContentsContaining(String keyword);
     // 내 게시물만 조회
     Page<Post> findByUserId(Long userId, Pageable pageable);
+
+    // 친구 게시물 조회
+    @Query("SELECT Post FROM Post WHERE Post.user.id = :userId")
+    Page<Post> findFriendPosts(@Param("userId") Long userId, Pageable pageable);
 }
