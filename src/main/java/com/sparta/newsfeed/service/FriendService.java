@@ -97,7 +97,7 @@ public class FriendService {
     // 2, 친구의 게시물 조회 (페이징 처리)
     public PostResponseDto getFriendsPosts(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Post> postsPage = postRepository.findByUserIdIn(friendRepository.findAcceptedFriendIdsByUserId(userId), pageable);
+        Page<Post> postsPage = friendRepository.findByFreindPosts(friendRepository.findAcceptedFriendId(userId), pageable);
 
         PostResponseDto response = new PostResponseDto();
         response.setPage(page);

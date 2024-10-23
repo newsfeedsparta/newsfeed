@@ -10,6 +10,6 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     // 키워드로 게시물 조회
     List<Post> findByContentsContaining(String keyword);
-    // 친구의 게시물만 조회
-    Page<Post> findByUserIdIn(List<Long> userIds, Pageable pageable);
+    // 내 게시물만 조회
+    Page<Post> findByUserId(List<Long> userId, Pageable pageable);
 }

@@ -104,7 +104,7 @@ public class FriendController {
         }
 
         // 친구의 게시물 조회
-        PostResponseDto postResponse = postService.getPostsByFriend(friendId, page, size);
+        PostResponseDto postResponse = friendService.getFriendsPosts(friendId, page, size);
         return new ResponseEntity<>(postResponse, HttpStatus.OK);
     }
 
