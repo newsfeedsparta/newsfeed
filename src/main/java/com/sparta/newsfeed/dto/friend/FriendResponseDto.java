@@ -1,24 +1,24 @@
 package com.sparta.newsfeed.dto.friend;
 
+import com.sparta.newsfeed.entity.Friend;
+import com.sparta.newsfeed.entity.FriendStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class FriendResponseDto {
-    private Long requestId; // 친구 요청 ID
-    private Long userId; //  요청을 보낸 사용자 ID
+    private Long id; // 친구 요청 ID
+    private Long requesterId; //  요청을 보낸 사용자 ID
     private Long receiverId; // 요청을 받은 사용자 ID
-    private String status; // 요청 상태 (PENDING, ACCEPTED, REJECTED)
+    private FriendStatus status; // 요청 상태 (PENDING, ACCEPTED, REJECTED)
 
-    private List<FriendInfo> friends; // 친구 목록 리스트
-    private int page; // 현재 페이지
-    private int totalPages; // 총 페이지 수
-
-    // 친구 정보
-    public static class FriendInfo {
-        private Long receiverId; // 친구의 사용자 ID
-        private String username; // 친구의 사용자 이름
-        private String selfIntroduction; // 자기소개
+    public FriendResponseDto(Friend friend) {
+        this.id = friend.getId();
+        this.requesterId = friend.getRequesterId();
+        this.receiverId = friend.getReceiverId();
+        this.status = friend.getStatus();
     }
 }

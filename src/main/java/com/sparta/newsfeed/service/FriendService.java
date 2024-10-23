@@ -4,10 +4,7 @@ import com.sparta.newsfeed.dto.Post.PostResponseDto;
 import com.sparta.newsfeed.dto.friend.FriendRequestDto;
 import com.sparta.newsfeed.dto.friend.FriendResponseDto;
 import com.sparta.newsfeed.dto.friend.MyFriendResponseDto;
-import com.sparta.newsfeed.entity.Friend;
-import com.sparta.newsfeed.entity.FriendStatus;
-import com.sparta.newsfeed.entity.Post;
-import com.sparta.newsfeed.entity.User;
+import com.sparta.newsfeed.entity.*;
 import com.sparta.newsfeed.repository.FriendRepository;
 import com.sparta.newsfeed.repository.PostRepository;
 import com.sparta.newsfeed.repository.ProfileRepository;
@@ -20,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,144 +32,103 @@ public class FriendService {
 
     // 친구 요청 생성 및 상태 설정
     public FriendResponseDto createFriendRequest(FriendRequestDto friendRequestDto) {
-        User requester = userRepository.findById(requestorId)
-                .orElseThrow(() -> new RuntimeException("Requestor not found"));
-        User receiver = userRepository.findById(friendId)
-                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+        User requester = userRepository.findById(friendRequestDto.getRequesterId())
+                .orElseThrow(() -> new RuntimeException("요청하는 사용자를 찾을 수 없습니다."));
+        User receiver = userRepository.findById(friendRequestDto.getReceiverId())
+                .orElseThrow(() -> new RuntimeException("요청 받는 사용자를 찾을 수 없습니다."));
 
+        // 요청자가 수신자에게 또는 수신자가 요청자에게 이미 요청이 존재하는지 확인
+        boolean exists = friendRepository.existsByRequesterIdAndReceiverId(friendRequestDto.getRequesterId(), friendRequestDto.getReceiverId())
+                || friendRepository.existsByRequesterIdAndReceiverId(friendRequestDto.getReceiverId(), friendRequestDto.getRequesterId());
 
-        Friend friendRequest = new Friend();
-        friendRequest.setRequestor(requestor); // 요청자 설정
-        friendRequest.setReceiver(receiver); // 수신자 설정
-        friendRequest.setStatus(FriendStatus.PENDING); // 상태 설정, 기본값 PENDING
+        if (exists) {
+            throw new IllegalArgumentException("이미 존재하는 요청입니다.");
+        }
+
+        Friend friendRequest = Friend.from(friendRequestDto);
         friendRepository.save(friendRequest); // 친구 요청 저장
 
-        // FriendResponseDto 로 변환하여 반환
-        return convertToDto(friendRequest);
+        return friendRequest.to();
     }
 
     //  친구 요청 상태 변경
-    public FriendResponseDto updateFriendRequestStatus(Long requestorId, String status) {
-        Friend friendRequest = friendRepository.findById(requestorId)
+    public FriendResponseDto updateFriendRequestStatus(Long requestId, String status) {
+        Friend friendRequest = friendRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("친구 요청을 찾을 수 없습니다."));
         friendRequest.setStatus(FriendStatus.valueOf(status)); // 상태 변경
         friendRepository.save(friendRequest); // 변경된 요청 저장
 
-        return convertToDto(friendRequest); //변환하여 반환
+        return friendRequest.to(); //변환하여 반환
     }
 
+    // 친구 요청을 조회
+    public List<FriendResponseDto> getFriendRequests(int pageNo, int pageSize, HttpServletRequest req) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "modifiedAt"));
 
-    // Friend 객체를 FriendResponseDto 로 변환
-    private FriendResponseDto convertToDto(Friend friend) {
-        FriendResponseDto friendResponseDto = new FriendResponseDto();
-        friendResponseDto.setRequestId(friend.getId());
-        friendResponseDto.setUserId(friend.getRequestor().getId());
-        friendResponseDto.setReceiverId(friend.getReceiver().getId());
-        friendResponseDto.setStatus(friend.getStatus().name());
-        return friendResponseDto;
+        User user = (User) req.getAttribute("user");
+
+        Page<Friend> friends = friendRepository.findByRequesterIdOrReceiverId(user.getId(), user.getId(), pageable);
+
+        return friends.stream().map(FriendResponseDto::new).toList();
     }
 
-
-    // 친구 (User)를 조회
-    public Page<MyFriendResponseDto> getMyFriends(int pageNo, int pageSize, HttpServletRequest request) {
+    // 내 친구를 조회
+    public List<MyFriendResponseDto> getMyFriends(int pageNo, int pageSize, HttpServletRequest request) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "modifiedAt"));
 
         User user = (User) request.getAttribute("user");
 
-        Page<Friend> friends = friendRepository.findFriends(user.getId(), FriendStatus.ACCEPTED, pageable);
+        Page<Friend> friends = friendRepository.findFriends(user.getId(), user.getId(), FriendStatus.ACCEPTED, pageable);
 
-        // 친구의 receiverId 목록 추출
-        List<Long> receiverIds = friends.stream()
-                .map(Friend::getReceiverId)
+        List<Long> friendIds = friends.stream()
+                .map(friend -> friend.getRequesterId().equals(user.getId()) ? friend.getReceiverId() : friend.getRequesterId())
                 .collect(Collectors.toList());
 
-        // receiverId로 User 목록 조회
-        Page<User> users = userRepository.findByIdIn(receiverIds, pageable);
+        List<User> users = userRepository.findUsersById(friendIds);
 
-        // User 목록을 MyFriendResponseDto로 변환하여 반환 (필요한 로직을 추가)
-        Page<MyFriendResponseDto> myFriendResponseDtos = users.map(userEntity ->
-                new MyFriendResponseDto(userEntity.getId(), userEntity.getName(), userEntity.getProfileImageUrl())
-        );
+        return users.stream().map(userEntity -> {
+            System.out.println(userEntity.getId());
+            Profile profile = profileRepository.findByUserId(userEntity.getId()).orElseThrow(
+                    () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
+            );
+            String selfIntroduction = profile != null ? profile.getSelfIntroduction() : null;
 
-
-        return null;
+            return new MyFriendResponseDto(userEntity.getId(), userEntity.getUsername(), userEntity.getEmail(), selfIntroduction);
+        }).toList();
     }
 
+    // 친구 게시물 조회
+    public List<PostResponseDto> getFriendPosts(Long friendId, int pageNo, int pageSize, HttpServletRequest req) {
+        User user = (User) req.getAttribute("user");
 
-    // 친구 요청을 조회
+        boolean canGetPost = friendRepository.existsByRequesterIdAndReceiverIdAndStatus(user.getId(), friendId, FriendStatus.ACCEPTED) ||
+                friendRepository.existsByRequesterIdAndReceiverIdAndStatus(friendId, user.getId(), FriendStatus.ACCEPTED);
 
+        System.out.println(friendRepository.existsByRequesterIdAndReceiverIdAndStatus(user.getId(), friendId, FriendStatus.ACCEPTED) );
+        System.out.println(friendRepository.existsByRequesterIdAndReceiverIdAndStatus(friendId, user.getId(), FriendStatus.ACCEPTED));
+        if (!canGetPost) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
 
-    // 1. 친구 목록 조회 (ACCEPTED 상태인 친구만)
-    public FriendResponseDto getFriends(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Post> posts = postRepository.findByUserId(friendId, pageable);
 
-
-        // Pageable 객체 생성
-        Pageable pageable = PageRequest.of(page, size);
-
-        // ACCEPTED 상태인 친구만 페이징 처리하여 가져오기
-        Page<Friend> friendsPage = friendRepository.findFriends(userId, FriendStatus.ACCEPTED, pageable);
-        // List<Friend>
-        // userRepo -> receiverId로 유저를 조회
-        // return List<User>
-
-
-        // FriendResponseDto로 변환하여 반환
-        FriendResponseDto response = new FriendResponseDto();
-
-
-        // 친구 목록 설정
-        List<FriendResponseDto.FriendInfo> friendInfoList = friendsPage.stream()
-                .map(friend -> {
-                    FriendResponseDto.FriendInfo info = new FriendResponseDto.FriendInfo();
-                    info.setReceiverId(friend.getReceiver().getId());  // 친구의 사용자 ID
-                    info.setUsername(friend.getReceiver().getUsername());  // 친구의 사용자 이름
-                    info.setSelfIntroduction(friend.getReceiver().getProfile().getSelfIntroduction());  // 친구의 자기소개
-                    return info;
-                })
-                .collect(Collectors.toList());
-
-        response.setFriends(friendInfoList);  // 친구 목록 설정
-
-        return response;
+        return posts.stream().map(PostResponseDto::fromEntity).toList();
     }
 
-    //2. 친구 게시물 조회
-    public PostResponseDto getFriendPosts(Long friendId, int page, int size) {
-        // Pageable 객체 생성
-        Pageable pageable = PageRequest.of(page, size);
+    // 친구 삭제
+    public void deleteFriend(Long requestId, HttpServletRequest req) {
+        User user = (User) req.getAttribute("user");
 
+        Friend friend = friendRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("친구 요청을 찾을 수 없습니다."));
 
-        Page<Post> postsPage = postRepository.findFriendPosts(friendId, pageable);
+        if (!friend.getRequesterId().equals(user.getId()) && !friend.getReceiverId().equals(user.getId())) {
+            throw new IllegalArgumentException("이 친구 요청을 삭제할 권한이 없습니다.");
+        }
 
-        // PostResponseDto로 변환하여 반환
-        PostResponseDto response = new PostResponseDto();
-
-        // 게시물 목록 설정
-        List<PostResponseDto.PostInfo> postInfoList = postsPage.stream()
-                .map(post -> {
-                    PostResponseDto.PostInfo info = new PostResponseDto.PostInfo();
-                    info.setPostId(post.getId());  // 게시물 ID
-                    info.setContents(post.getContents());  // 게시물 내용
-                    info.setCreatedAt(Timestamp.valueOf(post.getCreatedAt()));  // 게시물 작성 시간
-                    return info;
-                })
-                .collect(Collectors.toList());
-
-        response.setPosts(postInfoList);  // 게시물 목록 설정
-        response.setPage(page);  // 현재 페이지
-        response.setTotalPages(postsPage.getTotalPages());  // 총 페이지 수
-
-        return response;
+        friendRepository.delete(friend);
     }
-
-
-    // 3. 친구 삭제
-
-    public void deleteFriend(Long userId, Long friendId) {
-        // 친구 관계 삭제
-        friendRepository.deleteFriendship(userId, friendId);
-    }
-
 }
 
 

@@ -11,21 +11,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FriendRepository extends JpaRepository<Friend, Long> {
+    Page<Friend> findByRequesterIdOrReceiverIdAndStatus(Long requesterId, Long receiverId, FriendStatus status, Pageable pageable);
+
+    Page<Friend> findByRequesterIdOrReceiverId(Long requesterId, Long receiverId, Pageable pageable);
+
+    boolean existsByRequesterIdAndReceiverId(Long requesterId, Long receiverId);
 
 
+    @Query("SELECT f FROM Friend f WHERE (f.requesterId = :requesterId OR f.receiverId = :receiverId) AND f.status = :status ORDER BY f.modifiedAt DESC")
+    Page<Friend> findFriends(@Param("requesterId") Long requesterId, @Param("receiverId") Long receiverId, @Param("status") FriendStatus status, Pageable pageable);
 
-    //데이터 베이스에 직접 요청하는 쿼리어노테이션
-
-    @Query("SELECT friend FROM Friend friend WHERE friend.requestor.id = :userId AND friend.status = :status")
-    Page<Friend> findFriends(@Param("userId") Long userId, @Param("status") FriendStatus status, Pageable pageable);
-
-    @Modifying
-    @Query("DELETE FROM Friend friend WHERE (friend.requestor.id = :requestorId AND friend.receiver.id = :receiverId) OR (friend.requestor.id = :receiverId AND friend.receiver.id = :requestorId)")
-    void deleteFriendship(@Param("requestorId") Long requestorId, @Param("receiverId") Long receiverId);
-
-
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Friend f WHERE f.requesterId = :requesterId AND f.receiverId = :receiverId AND f.status = :status")
+    boolean existsByRequesterIdAndReceiverIdAndStatus(@Param("requesterId") Long requesterId, @Param("receiverId") Long receiverId, @Param("status") FriendStatus status);
 
 
 }

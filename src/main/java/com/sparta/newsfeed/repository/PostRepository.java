@@ -12,12 +12,6 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     // 키워드로 게시물 조회
     List<Post> findByContentsContaining(String keyword);
-    // 내 게시물만 조회
     Page<Post> findByUserId(Long userId, Pageable pageable);
-
-    // 친구 게시물 조회
-
-    @Query("SELECT p FROM Post p WHERE p.user.id = :friendId ORDER BY p.modifiedAt DESC")
-    Page<Post> findFriendPosts(@Param("friendId") Long friendId, Pageable pageable);
 
 }

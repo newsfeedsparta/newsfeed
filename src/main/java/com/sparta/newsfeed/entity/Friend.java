@@ -1,6 +1,7 @@
 package com.sparta.newsfeed.entity;
 
 import com.sparta.newsfeed.dto.friend.FriendRequestDto;
+import com.sparta.newsfeed.dto.friend.FriendResponseDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +33,16 @@ public class Friend extends Timestamped{
     private void init(FriendRequestDto req){
         this.requesterId = req.getRequesterId();
         this.receiverId = req.getReceiverId();
+        status = FriendStatus.PENDING;
     }
 
+    public FriendResponseDto to(){
+        return new FriendResponseDto(
+                id,
+                requesterId,
+                receiverId,
+                status
+        );
+    }
 }
 
