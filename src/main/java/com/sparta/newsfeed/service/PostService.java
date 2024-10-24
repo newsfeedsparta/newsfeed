@@ -42,11 +42,17 @@ public class PostService {
     }
 
     // 모든 게시물 조회
-    public List<PostResponseDto> getAllPosts(HttpServletRequest request) {
-        User user = (User) request.getAttribute("user");
-        return postRepository.findAll().stream()
-                .map(PostResponseDto::fromEntity)
-                .collect(Collectors.toList());
+    public List<PostResponseDto> getAllPosts(int page, int size) {
+        // User user = (User) request.getAttribute("user");
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());
+            return postRepository.findAll(pageable).stream()
+                    .map(PostResponseDto::fromEntity)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("모든 게시물 조회 중 오류가 발생했습니다.", e);
+        }
+
     }
 
     // 내 게시물 조회

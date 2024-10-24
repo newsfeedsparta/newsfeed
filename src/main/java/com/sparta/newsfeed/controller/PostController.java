@@ -38,9 +38,10 @@ public class PostController {
 
     // 모든 게시물 조회
     @GetMapping()
-    public ResponseEntity<Object> getPosts(HttpServletRequest request) {
+    public ResponseEntity<Object> getPosts(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNum,
+                                           @RequestParam(required = false, defaultValue = "10", value = "pageSize") int pageSize) {
         try {
-            List<PostResponseDto> responseDto = postService.getAllPosts(request);
+            List<PostResponseDto> responseDto = postService.getAllPosts(pageNum, pageSize);
             return ResponseEntity.ok(responseDto);
 
         } catch (Exception e) {
