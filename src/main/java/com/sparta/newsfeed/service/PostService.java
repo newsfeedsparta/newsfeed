@@ -10,14 +10,12 @@ import com.sparta.newsfeed.repository.PostRepository;
 import com.sparta.newsfeed.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +40,7 @@ public class PostService {
     }
 
     // 모든 게시물 조회
-    public List<PostResponseDto> getAllPosts(int page, int size) {
+    public List<PostResponseDto> getAllPosts(int page, int size, HttpServletRequest request) {
         // User user = (User) request.getAttribute("user");
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedAt").descending());

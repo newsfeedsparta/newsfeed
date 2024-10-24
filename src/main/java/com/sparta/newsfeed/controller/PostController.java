@@ -23,7 +23,7 @@ public class PostController {
 
 
     // 게시물 생성
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<Object> createPost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
         try {
             return ResponseEntity
@@ -39,9 +39,10 @@ public class PostController {
     // 모든 게시물 조회
     @GetMapping()
     public ResponseEntity<Object> getPosts(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNum,
-                                           @RequestParam(required = false, defaultValue = "10", value = "pageSize") int pageSize) {
+                                           @RequestParam(required = false, defaultValue = "10", value = "pageSize") int pageSize,
+                                           HttpServletRequest request) {
         try {
-            List<PostResponseDto> responseDto = postService.getAllPosts(pageNum, pageSize);
+            List<PostResponseDto> responseDto = postService.getAllPosts(pageNum, pageSize, request);
             return ResponseEntity.ok(responseDto);
 
         } catch (Exception e) {
